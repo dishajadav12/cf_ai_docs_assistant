@@ -156,7 +156,7 @@ wrangler pages deploy ./public --project-name=docsai
 
 ## UI Screenshots
 
-<p align="center"> <img src="chatui-desktop-1.png" alt="Chat UI Screenshot 1" width="900" /> </p> <p align="center"> <img src="chatui-desktop-2.png" alt="Chat UI Screenshot 2" width="900" /> </p> <p align="center"> <img src="chatui-desktop-3.png" alt="Chat UI Screenshot 3" width="900" /> </p>
+<p align="center"> <img src="chatui-desktop-3.png" alt="Chat UI Screenshot 1" width="900" /> </p> <p align="center"> <img src="chatui-desktop-1.png" alt="Chat UI Screenshot 2" width="900" /> </p> <p align="center"> <img src="chatui-desktop-2.png" alt="Chat UI Screenshot 3" width="900" /> </p>
 
 
 ## Test Checklist
