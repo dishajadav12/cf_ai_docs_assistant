@@ -154,6 +154,11 @@ wrangler pages deploy ./public --project-name=docsai
 - Worker API: `https://cf-docs-ai.dishaoncloud.workers.dev`
 - Latest Pages deployment URL is printed by Wrangler after deploy.
 
+## UI Screenshots
+
+<p align="center"> <img src="chatui-desktop-1.png" alt="Chat UI Screenshot 1" width="900" /> </p> <p align="center"> <img src="chatui-desktop-2.png" alt="Chat UI Screenshot 2" width="900" /> </p> <p align="center"> <img src="chatui-desktop-3.png" alt="Chat UI Screenshot 3" width="900" /> </p>
+
+
 ## Test Checklist
 
 1. Set project context and save.
