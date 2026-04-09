@@ -1,0 +1,28 @@
+{
+  "name": "cf-docs-ai",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "wrangler dev",
+    "start": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250417.0",
+    "@types/node": "^25.5.2",
+    "typescript": "^5.0.4",
+    "wrangler": "^4.81.0"
+  },
+  "packageManager": "pnpm@9.1.4",
+  "engines": {
+    "pnpm": "^9.1.4"
+  },
+  "pnpm": {
+    "overrides": {
+      "esbuild": "0.21.4"
+    }
+  },
+  "dependencies": {
+    "hono": "^4.12.12"
+  }
+}

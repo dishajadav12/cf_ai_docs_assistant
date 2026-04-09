@@ -1,0 +1,614 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cloudflare Docs Assistant</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap");
+
+      :root {
+        --bg: #f5f2ea;
+        --panel: #fff9ef;
+        --ink: #1f1d1b;
+        --muted: #5e5a53;
+        --accent: #ff6b2d;
+        --accent-2: #f0b83e;
+        --line: #dfd7c7;
+        --ai: #fff;
+        --user: #1f1d1b;
+        --user-ink: #fff;
+        --shadow: 0 18px 36px rgba(34, 28, 19, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Space Grotesk", sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at 12% 9%, rgba(255, 201, 77, 0.5), transparent 36%),
+          radial-gradient(circle at 88% 15%, rgba(255, 107, 45, 0.18), transparent 32%),
+          linear-gradient(145deg, #f6f4ef 0%, #eee4d2 100%);
+        min-height: 100vh;
+        padding: 1rem;
+      }
+
+      .app {
+        width: min(1280px, 100%);
+        margin: 0 auto;
+        animation: rise 320ms ease-out;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 0.85rem;
+      }
+
+      .title {
+        margin: 0;
+        font-size: clamp(1.2rem, 2vw, 1.8rem);
+        letter-spacing: -0.02em;
+      }
+
+      .subtitle {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      .workspace {
+        display: grid;
+        grid-template-columns: 30% 70%;
+        gap: 0.9rem;
+        align-items: stretch;
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        background: linear-gradient(165deg, var(--panel) 0%, #fff 100%);
+      }
+
+      .panel-head {
+        padding: 0.85rem 1rem;
+        border-bottom: 1px solid var(--line);
+        background: linear-gradient(90deg, rgba(255, 201, 77, 0.35), rgba(255, 107, 45, 0.2));
+      }
+
+      .panel-title {
+        margin: 0;
+        font-size: 1rem;
+        letter-spacing: 0.01em;
+      }
+
+      .panel-subtitle {
+        margin: 0.3rem 0 0;
+        color: var(--muted);
+        font-size: 0.86rem;
+      }
+
+      .panel-body {
+        padding: 0.9rem;
+      }
+
+      .label {
+        display: block;
+        margin-bottom: 0.42rem;
+        font-size: 0.92rem;
+        font-weight: 600;
+      }
+
+      textarea,
+      input {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 0.75rem 0.85rem;
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 0.98rem;
+        color: var(--ink);
+        background: #fff;
+      }
+
+      textarea {
+        min-height: 86px;
+        resize: vertical;
+      }
+
+      #contextInput {
+        min-height: 400px;
+      }
+
+      button {
+        border: 0;
+        border-radius: 11px;
+        padding: 0.62rem 0.95rem;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: transform 110ms ease, filter 110ms ease;
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.02);
+      }
+
+      .btn-accent {
+        background: var(--accent);
+        color: #fff;
+      }
+
+      .btn-dark {
+        background: var(--ink);
+        color: #fff;
+      }
+
+      .context-actions,
+      .chat-actions {
+        margin-top: 0.75rem;
+        display: flex;
+        justify-content: flex-start;
+        gap: 0.5rem;
+      }
+
+      .btn-muted {
+        background: #ece6da;
+        color: #2e2a25;
+      }
+
+      .chat-panel {
+        display: flex;
+        flex-direction: column;
+        min-height: 78vh;
+      }
+
+      .chat-wrap {
+        flex: 1;
+        overflow: auto;
+        padding: 1.1rem 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+        background: repeating-linear-gradient(
+          to bottom,
+          rgba(255, 255, 255, 0.96) 0,
+          rgba(255, 255, 255, 0.96) 27px,
+          rgba(239, 232, 220, 0.62) 28px
+        );
+      }
+
+      .bubble {
+        max-width: min(82%, 700px);
+        border-radius: 14px;
+        padding: 0.7rem 0.85rem;
+        line-height: 1.45;
+        white-space: pre-wrap;
+        animation: pop 180ms ease-out;
+      }
+
+      .bubble.user {
+        margin-left: auto;
+        background: var(--user);
+        color: var(--user-ink);
+      }
+
+      .bubble.ai {
+        margin-right: auto;
+        background: var(--ai);
+        border: 1px solid var(--line);
+      }
+
+      .thinking-dots {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        min-height: 1.2rem;
+      }
+
+      .thinking-dots span {
+        width: 0.42rem;
+        height: 0.42rem;
+        border-radius: 50%;
+        background: #8b867d;
+        display: inline-block;
+        animation: dotPulse 1s infinite ease-in-out;
+      }
+
+      .thinking-dots span:nth-child(2) {
+        animation-delay: 0.15s;
+      }
+
+      .thinking-dots span:nth-child(3) {
+        animation-delay: 0.3s;
+      }
+
+      .composer {
+        border-top: 1px solid var(--line);
+        background: linear-gradient(165deg, #fff 0%, #f8f3e9 100%);
+        padding: 1rem;
+      }
+
+      .status {
+        margin-top: 0.55rem;
+        font-size: 0.8rem;
+        color: var(--muted);
+        font-family: "IBM Plex Mono", monospace;
+        min-height: 1.1em;
+      }
+
+      @keyframes pop {
+        from {
+          transform: translateY(7px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes rise {
+        from {
+          transform: translateY(12px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes dotPulse {
+        0%,
+        80%,
+        100% {
+          transform: translateY(0);
+          opacity: 0.35;
+        }
+        40% {
+          transform: translateY(-2px);
+          opacity: 1;
+        }
+      }
+
+      @media (max-width: 700px) {
+        body {
+          padding: 0.45rem;
+        }
+
+        .topbar {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.2rem;
+        }
+
+        .workspace {
+          grid-template-columns: 1fr;
+        }
+
+        .chat-panel {
+          min-height: 65vh;
+        }
+
+        .chat-wrap {
+          min-height: 360px;
+        }
+
+        .bubble {
+          max-width: 90%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <section class="topbar">
+        <h1 class="title">Cloudflare Docs Assistant</h1>
+        <p class="subtitle">Ask about Workers, Durable Objects, Workflows, D1, R2, KV, Pages, and more.</p>
+      </section>
+
+      <section class="workspace">
+        <aside class="panel">
+          <div class="panel-head">
+            <h2 class="panel-title">Project Context</h2>
+            <p class="panel-subtitle">This context personalizes all answers.</p>
+          </div>
+          <div class="panel-body">
+            <label for="contextInput" class="label">Set my project context</label>
+            <textarea id="contextInput" placeholder="Example: I am building a multiplayer game on Workers with Durable Objects and WebSockets."></textarea>
+            <div class="context-actions">
+              <button class="btn-accent" id="saveContextButton">Save Context</button>
+            </div>
+          </div>
+        </aside>
+
+        <section class="panel chat-panel">
+          <div class="panel-head">
+            <h2 class="panel-title">Chat</h2>
+            <p class="panel-subtitle">Ask practical Cloudflare architecture questions.</p>
+          </div>
+
+          <section id="chat" class="chat-wrap"></section>
+
+          <section class="composer">
+            <label for="questionInput" class="label">Ask a Cloudflare question</label>
+            <input id="questionInput" type="text" placeholder="How should I design room state sync with Durable Objects and WebSockets?" />
+            <div class="chat-actions">
+              <button class="btn-muted" id="clearHistoryButton">Clear History</button>
+              <button class="btn-dark" id="sendButton">Send</button>
+            </div>
+            <div class="status" id="statusText"></div>
+          </section>
+        </section>
+      </section>
+    </main>
+
+    <script>
+      const chatEl = document.getElementById("chat");
+      const contextInputEl = document.getElementById("contextInput");
+      const questionInputEl = document.getElementById("questionInput");
+      const statusTextEl = document.getElementById("statusText");
+      const sendButtonEl = document.getElementById("sendButton");
+      const clearHistoryButtonEl = document.getElementById("clearHistoryButton");
+      const saveContextButtonEl = document.getElementById("saveContextButton");
+      const workerApiDefault = "https://cf-docs-ai.dishaoncloud.workers.dev";
+      const queryApi = new URLSearchParams(window.location.search).get("api");
+      let API_BASE = queryApi
+        ? queryApi.replace(/\/$/, "")
+        : window.location.hostname.endsWith(".pages.dev")
+          ? workerApiDefault
+          : "";
+
+      function apiUrl(path) {
+        return `${API_BASE}${path}`;
+      }
+
+      async function requestApi(path, init) {
+        const primaryUrl = apiUrl(path);
+
+        try {
+          const response = await fetch(primaryUrl, init);
+          if (response.ok) {
+            return response;
+          }
+          throw new Error(`API request failed: ${response.status}`);
+        } catch (error) {
+          if (API_BASE !== workerApiDefault) {
+            const fallbackUrl = `${workerApiDefault}${path}`;
+            const fallbackResponse = await fetch(fallbackUrl, init);
+            if (fallbackResponse.ok) {
+              API_BASE = workerApiDefault;
+              setStatus("Local API unavailable. Switched to deployed API.");
+              return fallbackResponse;
+            }
+          }
+
+          throw error;
+        }
+      }
+
+      function isLocalHost(hostname) {
+        return hostname === "localhost" || hostname === "127.0.0.1";
+      }
+
+      async function probeApi(base) {
+        try {
+          const response = await fetch(`${base}/context`, {
+            method: "GET",
+            credentials: "include",
+            mode: "cors",
+          });
+          if (!response.ok) {
+            return false;
+          }
+
+          const data = await response.json();
+          return typeof data.context === "string";
+        } catch {
+          return false;
+        }
+      }
+
+      async function resolveApiBase() {
+        if (queryApi) {
+          return;
+        }
+
+        if (!isLocalHost(window.location.hostname)) {
+          return;
+        }
+
+        const candidates = [];
+        const origin = window.location.origin;
+        candidates.push(origin);
+
+        const currentPort = window.location.port;
+        if (currentPort !== "8788") {
+          candidates.push("http://127.0.0.1:8788");
+        }
+        if (currentPort !== "8787") {
+          candidates.push("http://127.0.0.1:8787");
+        }
+
+        for (const candidate of candidates) {
+          const ok = await probeApi(candidate);
+          if (ok) {
+            API_BASE = candidate === origin ? "" : candidate;
+            setStatus(`Connected to local API: ${candidate}`);
+            return;
+          }
+        }
+
+        API_BASE = workerApiDefault;
+        setStatus("Could not auto-detect local API. Using deployed API.");
+      }
+
+      function setStatus(text) {
+        statusTextEl.textContent = text;
+      }
+
+      function addBubble(role, content) {
+        const bubble = document.createElement("article");
+        bubble.className = `bubble ${role}`;
+        bubble.textContent = content;
+        chatEl.appendChild(bubble);
+        chatEl.scrollTop = chatEl.scrollHeight;
+        return bubble;
+      }
+
+      function renderThinking(bubble) {
+        bubble.innerHTML = '<div class="thinking-dots" aria-label="Assistant is thinking"><span></span><span></span><span></span></div>';
+      }
+
+      async function loadHistory() {
+        chatEl.innerHTML = "";
+        const response = await requestApi("/history", {
+          method: "GET",
+          credentials: "include",
+        });
+
+        const data = await response.json();
+        const history = Array.isArray(data.history) ? data.history : [];
+        const context = typeof data.context === "string" ? data.context : "";
+
+        contextInputEl.value = context;
+        history.forEach((message) => {
+          const role = message.role === "user" ? "user" : "ai";
+          addBubble(role, message.content);
+        });
+      }
+
+      async function clearHistory() {
+        const response = await requestApi("/history", {
+          method: "DELETE",
+          credentials: "include",
+          mode: "cors",
+        });
+
+        chatEl.innerHTML = "";
+        setStatus("History cleared.");
+      }
+
+      async function saveContext() {
+        const context = contextInputEl.value.trim();
+
+        await requestApi("/context", {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          mode: "cors",
+          body: JSON.stringify({ context }),
+        });
+
+        setStatus("Context saved.");
+      }
+
+      async function sendMessage() {
+        const question = questionInputEl.value.trim();
+        if (!question) {
+          setStatus("Ask a question first.");
+          return;
+        }
+
+        questionInputEl.value = "";
+        addBubble("user", question);
+        const aiBubble = addBubble("ai", "");
+        renderThinking(aiBubble);
+        let receivedAnyToken = false;
+
+        setStatus("Generating answer...");
+        sendButtonEl.disabled = true;
+
+        try {
+          const response = await requestApi("/chat", {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            mode: "cors",
+            body: JSON.stringify({ question }),
+          });
+
+          if (!response.body) {
+            aiBubble.textContent = "The assistant could not respond right now.";
+            setStatus("Request failed.");
+            return;
+          }
+
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = "";
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) {
+              break;
+            }
+
+            buffer += decoder.decode(value, { stream: true });
+            const events = buffer.split("\n\n");
+            buffer = events.pop() || "";
+
+            for (const eventText of events) {
+              const lines = eventText.split("\n");
+              const dataLine = lines.find((line) => line.startsWith("data:"));
+              if (!dataLine) {
+                continue;
+              }
+
+              try {
+                const payload = JSON.parse(dataLine.slice(5).trim());
+                if (payload.type === "token") {
+                  if (!receivedAnyToken) {
+                    aiBubble.textContent = "";
+                    receivedAnyToken = true;
+                  }
+                  aiBubble.textContent += payload.token;
+                  chatEl.scrollTop = chatEl.scrollHeight;
+                } else if (payload.type === "status") {
+                  setStatus(`Workflow: ${payload.value}`);
+                } else if (payload.type === "error") {
+                  aiBubble.textContent = payload.message || "An error occurred.";
+                  setStatus("Error while generating answer.");
+                } else if (payload.type === "done") {
+                  setStatus("Done.");
+                }
+              } catch {
+                setStatus("Streaming parse warning.");
+              }
+            }
+          }
+        } catch {
+          aiBubble.textContent = "Network error while contacting the assistant.";
+          setStatus("Network error.");
+        } finally {
+          sendButtonEl.disabled = false;
+        }
+      }
+
+      sendButtonEl.addEventListener("click", sendMessage);
+      clearHistoryButtonEl.addEventListener("click", clearHistory);
+      saveContextButtonEl.addEventListener("click", saveContext);
+      questionInputEl.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          sendMessage();
+        }
+      });
+
+      (async () => {
+        await resolveApiBase();
+        await loadHistory().catch(() => setStatus("Failed to initialize chat."));
+      })();
+    </script>
+  </body>
+</html>
