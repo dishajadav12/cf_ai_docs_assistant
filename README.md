@@ -168,8 +168,3 @@ wrangler d1 execute cf-docs-ai-db --command="SELECT * FROM sessions;" --local --
 wrangler d1 execute cf-docs-ai-db --command="SELECT * FROM messages ORDER BY id DESC LIMIT 10;" --local --config=./wrangler.toml
 ```
 
-## Submission Notes
-
-- Requirement: repository name must start with `cf_ai_`.
-- Requirement: include `README.md` and `PROMPTS.md` (both included at root).
-- All implementation in this repository is original project work for this assignment.
